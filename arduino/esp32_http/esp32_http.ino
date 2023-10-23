@@ -3,7 +3,7 @@
 const char* ssid = "iotagh";
 const char* password = "IoTiISW123";
 
-const char* host = "192.168.1.179";
+const char* host = "192.168.1.175";
 const int Port = 8080;
 
 const char *uri = "/write";

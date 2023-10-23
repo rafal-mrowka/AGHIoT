@@ -11,12 +11,12 @@ import com.google.gson.Gson;
 
 public class IoTServer {
 
-    private static SensorData sensorData = new SensorData();
+    //private static SensorData sensorData = new SensorData();
 
     public static void main(String[] args) throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
         server.createContext("/write", new WriteHandler());
-        server.createContext("/read", new ReadHandler());
+//        server.createContext("/read", new ReadHandler());
         server.setExecutor(null); // creates a default executor
         server.start();
     }
@@ -31,7 +31,7 @@ public class IoTServer {
             Gson gson = new Gson();
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
-                sensorData = gson.fromJson(line, SensorData.class);
+                //sensorData = gson.fromJson(line, SensorData.class);
             }
 
             // Response
@@ -42,18 +42,18 @@ public class IoTServer {
             os.close();
         }
     }
-
-    static class ReadHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange t) throws IOException {
-
-            // Response
-            Gson gson = new Gson();
-            String response = gson.toJson(sensorData);
-            t.sendResponseHeaders(200, response.length());
-            OutputStream os = t.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        }
-    }
+//
+//    static class ReadHandler implements HttpHandler {
+//        @Override
+//        public void handle(HttpExchange t) throws IOException {
+//
+//            // Response
+//            Gson gson = new Gson();
+//            String response = gson.toJson(sensorData);
+//            t.sendResponseHeaders(200, response.length());
+//            OutputStream os = t.getResponseBody();
+//            os.write(response.getBytes());
+//            os.close();
+//        }
+//    }
 }
