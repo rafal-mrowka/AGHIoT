@@ -1,0 +1,215 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>  // for socket
+#include "lwip/ip4_addr.h"
+
+#include "esp_err.h"
+#include "esp_wifi.h"
+#include "nvs_flash.h"
+#include "esp_netif.h"
+
+#include "esp_random.h"
+#include "esp_log.h"
+
+
+int retry_num=0;
+
+static const char *TAG = "HTTPClient1";
+
+// connect, bind, and accept except pointers to
+// a generic socket address (protocol independent).
+// use this type for casting
+typedef struct sockaddr SA;
+const char* SERVER_IP = "192.168.1.175";
+const int SERVER_PORT = 8080;
+const char *uri = "/write";
+char strftime_buf[64];
+
+/* FreeRTOS event group to signal when we are connected
+	We need it to signal the WiFi connection establishment 
+	to our main program
+*/
+static EventGroupHandle_t s_wifi_event_group;
+
+static void wifi_event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id,void *event_data) {
+	if(event_id == WIFI_EVENT_STA_START) {
+  		printf("WIFI CONNECTING....\n");
+	} else if (event_id == WIFI_EVENT_STA_CONNECTED) {
+  		printf("WiFi CONNECTED\n");
+	} else if (event_id == WIFI_EVENT_STA_DISCONNECTED) {
+  		printf("WiFi lost connection\n");
+  		if(retry_num<5) {
+			esp_wifi_connect();
+			retry_num++;
+			printf("Retrying to Connect...\n");
+		}
+	} else if (event_id == IP_EVENT_STA_GOT_IP) {
+  		printf("Wifi got IP...\n\n");
+ 		ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+        printf("My IP:" IPSTR, IP2STR(&event->ip_info.ip));
+	}
+}
+
+int tcp_connect_sever(void) {
+
+        // create an IPv4, TCP socket file descriptor
+        int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        if (sockfd < 0) {
+            printf("Unable to create socket: errno %d\n", errno);
+    	    return -1;
+        }
+
+        // set up sockaddr struct with server info
+        struct sockaddr_in address;
+        address.sin_family = AF_INET; // ipv4
+        address.sin_port = htons(SERVER_PORT); // server port
+        address.sin_addr.s_addr = ipaddr_addr(SERVER_IP); // server ip
+
+        int err = connect(sockfd, (SA*)&address, sizeof(address));
+        if (err != 0) {
+	        printf("Socket unable to connect: errno %d\n", errno);
+    	    return -1;
+        }
+
+        printf("Successfully connected\n");
+		return sockfd;
+}
+
+void sendRequestGetResponse(int socket_file_desc) {
+	// For data to send
+	char postRequest[48];
+	char sensorData[256];
+	char sensorDataLength[20];  
+	int temp;
+	//For data to read
+	char readBuffer[1024];
+
+	// For time
+	time_t now;
+	struct tm timeinfo;
+
+	time(&now);
+	// Set timezone to CET
+	setenv("TZ", "CET-1", 1);
+	tzset();
+	
+	localtime_r(&now, &timeinfo);
+	strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+
+
+	// Prepase JSON with data
+  	temp = (int)(((double)esp_random()/4294967296.0)*10.0);
+
+	sprintf(sensorData,  "{\"time\":%s,\"temp\":%d}", strftime_buf, temp);
+	sprintf(sensorDataLength,  "%d", strlen(sensorData)); 
+	                                                                                                     
+	
+	sprintf(postRequest, "POST %s HTTP/1.1", uri);
+
+	printf(">> HTTP Request begin\n");	  
+	send(socket_file_desc, postRequest, strlen(postRequest), 0);
+	printf("%s", postRequest);
+	send(socket_file_desc, "\r\n", strlen("\r\n"), 0);
+	printf("\r\n");
+	send(socket_file_desc, "Host: ", strlen("Host: "), 0);
+	printf("Host: ");
+	send(socket_file_desc, SERVER_IP, strlen(SERVER_IP), 0);
+	printf("%s", SERVER_IP);
+	send(socket_file_desc, "\r\n", strlen("\r\n"), 0);
+	printf("\r\n");
+	send(socket_file_desc, "Content-Type: application/json\r\n", strlen("Content-Type: application/json\r\n"), 0);
+	printf("Content-Type: application/json\r\n");
+	send(socket_file_desc, "Content-Length: ", strlen("Content-Length: "), 0);
+	printf("Content-Length: ");
+	send(socket_file_desc, sensorDataLength, strlen(sensorDataLength), 0);
+	printf("%s", sensorDataLength);
+	send(socket_file_desc, "\r\n\r\n", strlen("\r\n\r\n"), 0);
+	printf("\r\n\r\n");
+	  
+	send(socket_file_desc, sensorData, strlen(sensorData), 0);
+	printf("%s", sensorData);
+	send(socket_file_desc, "\r\n", strlen("\r\n"), 0);
+	printf("\r\n");
+	         
+	printf(">> HTTP Request end\n");
+
+    // receive response from server
+    recv(socket_file_desc, readBuffer, 1024, 0);
+    printf("<< HTTP Response was:\n%s\r\n", readBuffer);
+
+    if (socket_file_desc != -1) {
+        printf("<< Socket close\n");
+    	shutdown(socket_file_desc, 0);
+        close(socket_file_desc);
+	}
+
+	return;
+}
+
+void setup(void) {
+
+
+	printf("WiFi setup start\n");
+
+	esp_netif_init(); // ESP network interface init
+    esp_event_loop_create_default();     // event loop  
+    esp_netif_create_default_wifi_sta(); // Prepare TCP/IP stack structure for WiFi client station
+
+	esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, wifi_event_handler, NULL);
+    esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, wifi_event_handler, NULL);
+
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT(); // Default WiFi configuration structure
+	esp_wifi_init(&cfg); // Init default values
+
+	// Setup SSID and PASS for our WiFi AP
+	wifi_config_t wifi_config = {
+        .sta = {
+            .ssid = "iotagh",
+            .password = "IoTiISW123",
+        },
+    };
+
+    esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
+    esp_wifi_start();
+	esp_wifi_set_mode(WIFI_MODE_STA);
+	esp_err_t status = esp_wifi_connect();
+	if (status == ESP_OK) {
+		printf("WiFI connected\n");
+	} else {
+		printf("WiFI connection failed: %s\n", esp_err_to_name(status));
+	}	
+}
+
+
+
+void app_main(void) {
+    //Initialize NVS to store WiFi AP configuration
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      nvs_flash_erase();
+      nvs_flash_init();
+    }
+	
+	// Setup WiFi connection in STA mode
+	setup();
+	
+	// Wait for WiFi connection to be established
+
+	printf("Try to connect server\n");
+//	ESP_LOGI(TAG, "Try to connect server\n");
+
+	int sockfd = -1;
+
+    while (true) {
+		sockfd = tcp_connect_sever();
+		if (sockfd>0) {
+			sendRequestGetResponse(sockfd);
+		} else {
+			printf("No TCP connection to server\n");
+		}
+
+		sleep(10);
+    }
+}

@@ -1,0 +1,1 @@
+Command: cmake -G Ninja -DPYTHON_DEPS_CHECKED=1 -DPYTHON=/home/rafal/.espressif/python_env/idf5.5_py3.12_env/bin/python -DESP_PLATFORM=1 -DSDKCONFIG=sdkconfig -DCCACHE_ENABLE=0 /home/rafal/dev/agh/iot/projects/HTTPClient1

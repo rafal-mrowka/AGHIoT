@@ -1,0 +1,2 @@
+com.espressif.idf.launch.serial.core.serialPort=/dev/ttyUSB0
+eclipse.preferences.version=1

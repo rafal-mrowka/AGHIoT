@@ -1,0 +1,72 @@
+Command: ninja flash
+[1/5] cd /home/rafal/dev/agh/iot/projects/firstapp/build/esp-idf/esptool_py && /home/rafal/.espressif/python_env/idf5.5_py3.12_env/bin/python /home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/rafal/dev/agh/iot/projects/firstapp/build/partition_table/partition-table.bin /home/rafal/dev/agh/iot/projects/firstapp/build/firstapp.bin
+firstapp.bin binary size 0xbbaf0 bytes. Smallest app partition is 0x177000 bytes. 0xbb510 bytes (50%) free.
+[2/5] Performing build step for 'bootloader'
+[1/1] cd /home/rafal/dev/agh/iot/projects/firstapp/build/bootloader/esp-idf/esptool_py && /home/rafal/.espressif/python_env/idf5.5_py3.12_env/bin/python /home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 /home/rafal/dev/agh/iot/projects/firstapp/build/bootloader/bootloader.bin
+Bootloader binary size 0x6680 bytes. 0x980 bytes (8%) free.
+[3/5] No install step for 'bootloader'
+[4/5] Completed 'bootloader'
+[4/5] cd /home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/esptool_py && /home/rafal/.espressif/tools/cmake/3.30.2/bin/cmake -D IDF_PATH=/home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1 -D "SERIAL_TOOL=/home/rafal/.espressif/python_env/idf5.5_py3.12_env/bin/python;;/home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/esptool_py/esptool/esptool.py;--chip;esp32" -D "SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args" -D WORKING_DIRECTORY=/home/rafal/dev/agh/iot/projects/firstapp/build -P /home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/esptool_py/run_serial_tool.cmake
+esptool.py --chip esp32 -p /dev/ttyUSB0 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 bootloader/bootloader.bin 0x10000 firstapp.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.10.0
+Serial port /dev/ttyUSB0
+Connecting.....
+Chip is ESP32-D0WDQ6 (revision v1.0)
+Features: WiFi, BT, Dual Core, Coding Scheme None
+Crystal is 40MHz
+MAC: 30:ae:a4:15:1c:f0
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00001000 to 0x00007fff...
+Flash will be erased from 0x00010000 to 0x000cbfff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+SHA digest in image updated
+Compressed 26240 bytes to 16496...
+Writing at 0x00001000... (50 %)
+Writing at 0x000075ef... (100 %)
+Wrote 26240 bytes (16496 compressed) at 0x00001000 in 0.7 seconds (effective 295.6 kbit/s)...
+Hash of data verified.
+Compressed 768752 bytes to 482394...
+Writing at 0x00010000... (3 %)
+Writing at 0x0001c79a... (6 %)
+Writing at 0x00024c7f... (10 %)
+Writing at 0x0002f7b2... (13 %)
+Writing at 0x000350d4... (16 %)
+Writing at 0x0003aeb3... (20 %)
+Writing at 0x00040c5a... (23 %)
+Writing at 0x00046bc1... (26 %)
+Writing at 0x0004c7e0... (30 %)
+Writing at 0x00052676... (33 %)
+Writing at 0x00057aee... (36 %)
+Writing at 0x0005d6d9... (40 %)
+Writing at 0x000631ee... (43 %)
+Writing at 0x00068a3b... (46 %)
+Writing at 0x0006e123... (50 %)
+Writing at 0x00073e10... (53 %)
+Writing at 0x00079b31... (56 %)
+Writing at 0x0007f504... (60 %)
+Writing at 0x0008512a... (63 %)
+Writing at 0x0008ac98... (66 %)
+Writing at 0x0009069c... (70 %)
+Writing at 0x00096471... (73 %)
+Writing at 0x0009bf2b... (76 %)
+Writing at 0x000a18f5... (80 %)
+Writing at 0x000ab4d8... (83 %)
+Writing at 0x000b1e71... (86 %)
+Writing at 0x000b7f7f... (90 %)
+Writing at 0x000bd94a... (93 %)
+Writing at 0x000c3b85... (96 %)
+Writing at 0x000c8eed... (100 %)
+Wrote 768752 bytes (482394 compressed) at 0x00010000 in 10.8 seconds (effective 566.8 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 105...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (105 compressed) at 0x00008000 in 0.0 seconds (effective 519.0 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...

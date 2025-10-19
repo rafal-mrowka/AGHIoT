@@ -1,0 +1,132 @@
+#include "esp_event.h"
+#include "esp_netif.h"
+#include "lwip/ip4_addr.h"
+#include "nvs_flash.h"
+#include "esp_wifi.h"
+#include "esp_err.h"
+#include "protocol_examples_common.h";
+#include <stdint.h>
+#include "esp_random.h"
+#include <stdio.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <sys/socket.h>  // for socket
+
+static const int  ip_protocol = 0;
+
+// connect, bind, and accept except pointers to
+// a generic socket address (protocol independent).
+// use this type for casting
+typedef struct sockaddr SA;
+const char* SERVER_IP = "192.168.1.76";
+const int SERVER_PORT = 8080;
+const char *uri = "/write";
+
+void tcp_connect(void) {
+
+        // create an IPv4, TCP socket file descriptor
+        int sockfd = socket(AF_INET, SOCK_STREAM, ip_protocol);
+        if (sockfd < 0) {
+            printf("Unable to create socket: errno %d", errno);
+    	    return;
+        }
+
+        // set up sockaddr struct with server info
+        struct sockaddr_in address;
+        address.sin_family = AF_INET; // ipv4
+        address.sin_port = htons(SERVER_PORT); // server port, big endian
+        address.sin_addr.s_addr = ipaddr_addr(SERVER_IP); // server ip
+
+        // attempt to establish a connection with the server
+        // block until connection is established or an error occurs
+        // if successful, open the client fd for reading and writing
+        int err = connect(sockfd, (SA*)&address, sizeof(address));
+        if (err != 0) {
+	        printf("Socket unable to connect: errno %d", errno);
+    	    return;
+        }
+
+        printf("Successfully connected");
+		
+		// Prepase JSON with data
+  		char sensorData[256];
+		char sensorDataLength[20];  
+  		uint32_t temp = esp_random(); 
+		
+		time_t now;
+		char strftime_buf[64];
+		struct tm timeinfo;
+
+		time(&now);
+		// Set timezone to CET
+		setenv("EU", "CET", 1);
+		tzset();
+
+		localtime_r(&now, &timeinfo);
+		strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo); 
+ 
+  		sprintf(sensorData,  "{\"time\":%s,\"temp\":%f}", strftime_buf, temp);
+		sprintf(sensorDataLength,  "%d", strlen(sensorData)); 
+                                                                                                     
+  		char postRequest[48];
+  		sprintf(postRequest, "POST %s HTTP/1.1", uri);
+  
+  		send(sockfd, postRequest, strlen(postRequest), 0);
+  		send(sockfd, "\r\n", strlen("\r\n"), 0);
+		send(sockfd, "Host: ", strlen("Host: "), 0);
+		send(sockfd, SERVER_IP, strlen(SERVER_IP), 0);
+		send(sockfd, "\r\n", strlen("\r\n"), 0);
+  		send(sockfd, "Content-Type: application/json\r\n", strlen("Content-Type: application/json\r\n"), 0);
+  		send(sockfd, "Content-Length: ", strlen("Content-Length: "), 0);
+  		send(sockfd, sensorDataLength, strlen(sensorDataLength), 0);
+		send(sockfd, "\r\n\r\n", strlen("\r\n\r\n"), 0);
+  
+
+  wifiClient.println(sensorData);          
+
+  Serial.println("Request sent");
+
+  while(wifiClient.connected()) {
+    String line = wifiClient.readStringUntil('\n');
+    Serial.println(line);
+    if (line == "\r")
+      break;
+  }  
+  Serial.println("BODY start");
+  String line = wifiClient.readStringUntil('\n');
+  Serial.println(line);
+  Serial.println("BODY stop");
+
+  delay(10000);                       
+  wifiClient.stop();    
+
+    while(1)
+	{
+        char* msg;
+        msg ="GET / HTTP/1.1\r\nHost: 192.168.1.227\r\n\r\n";
+
+        send(sockfd, msg, strlen(msg), 0);
+
+        // receive response from server
+        char buffer[1024];
+        recv(sockfd, buffer, 1024, 0);
+        printf("Response was: %s\r\n", buffer);
+        sleep(10);
+
+	}
+}
+
+
+void app_main(void)
+{
+	nvs_flash_init();
+	esp_netif_init();
+	esp_event_loop_create_default();
+	
+	example_connect();
+
+    while (true) {
+        printf("Hello from app_main!\n");
+        sleep(1);
+    }
+}

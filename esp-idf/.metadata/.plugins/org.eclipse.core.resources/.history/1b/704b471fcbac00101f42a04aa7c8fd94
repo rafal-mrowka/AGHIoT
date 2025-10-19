@@ -1,0 +1,124 @@
+#include "esp_event.h"
+#include "esp_netif.h"
+#include "lwip/ip4_addr.h"
+#include "nvs_flash.h"
+#include "protocol_examples_common.h"
+#include "esp_random.h"
+#include <stdio.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <sys/socket.h>  // for socket
+
+//#include "esp_wifi.h"
+//#include "esp_err.h"
+
+
+static const int  ip_protocol = 0;
+
+// connect, bind, and accept except pointers to
+// a generic socket address (protocol independent).
+// use this type for casting
+typedef struct sockaddr SA;
+const char* SERVER_IP = "192.168.1.76";
+const int SERVER_PORT = 8080;
+const char *uri = "/write";
+
+int tcp_connect_sever(void) {
+
+        // create an IPv4, TCP socket file descriptor
+        int sockfd = socket(AF_INET, SOCK_STREAM, ip_protocol);
+        if (sockfd < 0) {
+            printf("Unable to create socket: errno %d", errno);
+    	    return -1;
+        }
+
+        // set up sockaddr struct with server info
+        struct sockaddr_in address;
+        address.sin_family = AF_INET; // ipv4
+        address.sin_port = htons(SERVER_PORT); // server port, big endian
+        address.sin_addr.s_addr = ipaddr_addr(SERVER_IP); // server ip
+
+        // attempt to establish a connection with the server
+        // block until connection is established or an error occurs
+        // if successful, open the client fd for reading and writing
+        int err = connect(sockfd, (SA*)&address, sizeof(address));
+        if (err != 0) {
+	        printf("Socket unable to connect: errno %d", errno);
+    	    return -1;
+        }
+
+        printf("Successfully connected");
+		return sockfd;
+}
+
+
+void app_main(void)
+{
+	nvs_flash_init();
+	esp_netif_init();
+	esp_event_loop_create_default();
+	
+	example_connect();
+
+	sleep(20);
+	
+	int sockfd = tcp_connect_sever();
+	
+	while (sockfd < 0) {
+		printf("No connection to server");
+		sleep(10);
+		sockfd = tcp_connect_sever();
+	}
+
+	// For time
+	time_t now;
+	char strftime_buf[64];
+	struct tm timeinfo;
+
+	// For data
+	char sensorData[256];
+	char sensorDataLength[20];  
+	int temp;
+
+    while (true) {
+        printf("Hello from app_main!\n");
+		
+		// Prepase JSON with data
+  		temp = (int)(((double)esp_random()/4294967296.0)*10.0);
+		 
+		time(&now);
+		// Set timezone to CET
+		setenv("TZ", "CET+1", 1);
+		tzset();
+	
+		localtime_r(&now, &timeinfo);
+		strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo); 
+	 
+	  	sprintf(sensorData,  "{\"time\":%s,\"temp\":%d}", strftime_buf, temp);
+		sprintf(sensorDataLength,  "%d", strlen(sensorData)); 
+	                                                                                                     
+	  	char postRequest[48];
+	  	sprintf(postRequest, "POST %s HTTP/1.1", uri);
+	  
+	  	send(sockfd, postRequest, strlen(postRequest), 0);
+	  	send(sockfd, "\r\n", strlen("\r\n"), 0);
+		send(sockfd, "Host: ", strlen("Host: "), 0);
+		send(sockfd, SERVER_IP, strlen(SERVER_IP), 0);
+		send(sockfd, "\r\n", strlen("\r\n"), 0);
+	  	send(sockfd, "Content-Type: application/json\r\n", strlen("Content-Type: application/json\r\n"), 0);
+	  	send(sockfd, "Content-Length: ", strlen("Content-Length: "), 0);
+	  	send(sockfd, sensorDataLength, strlen(sensorDataLength), 0);
+		send(sockfd, "\r\n\r\n", strlen("\r\n\r\n"), 0);
+	  
+	  	send(sockfd, sensorData, strlen(sensorData), 0);
+		send(sockfd, "\r\n", strlen("\r\n"), 0);
+	         
+	  	printf("Request sent");
+
+        // receive response from server
+        char buffer[1024];
+        recv(sockfd, buffer, 1024, 0);
+        printf("Response was: %s\r\n", buffer);
+        sleep(10);
+    }
+}

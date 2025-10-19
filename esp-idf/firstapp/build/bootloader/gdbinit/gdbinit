@@ -1,0 +1,2 @@
+source /home/rafal/dev/agh/iot/projects/firstapp/build/bootloader/gdbinit/symbols
+source /home/rafal/dev/agh/iot/projects/firstapp/build/bootloader/gdbinit/connect

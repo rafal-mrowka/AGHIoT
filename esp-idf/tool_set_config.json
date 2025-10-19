@@ -1,0 +1,21 @@
+[
+  {
+    "id": 1299298188,
+    "idfLocation": "/home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1",
+    "idfVersion": "5.5.1",
+    "active": true,
+    "systemGitExecutablePath": "/usr/bin/git",
+    "systemPythonExecutablePath": "/home/rafal/miniconda3/bin/python3",
+    "envVars": {
+      "PATH": "/home/rafal/.espressif/tools/xtensa-esp-elf-gdb/16.2_20250324/xtensa-esp-elf-gdb/bin:/home/rafal/.espressif/tools/riscv32-esp-elf-gdb/16.2_20250324/riscv32-esp-elf-gdb/bin:/home/rafal/.espressif/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin:/home/rafal/.espressif/tools/esp-clang/esp-19.1.2_20250312/esp-clang/bin:/home/rafal/.espressif/tools/riscv32-esp-elf/esp-14.2.0_20241119/riscv32-esp-elf/bin:/home/rafal/.espressif/tools/esp32ulp-elf/2.38_20240113/esp32ulp-elf/bin:/home/rafal/.espressif/tools/cmake/3.30.2/bin:/home/rafal/.espressif/tools/openocd-esp32/v0.12.0-esp32-20250707/openocd-esp32/bin:/home/rafal/.espressif/tools/ninja/1.12.1/:/home/rafal/.espressif/python_env/idf5.5_py3.12_env/bin:/home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/tools:$PATH",
+      "IDF_COMPONENT_MANAGER": "1",
+      "OPENOCD_SCRIPTS": "/home/rafal/.espressif/tools/openocd-esp32/v0.12.0-esp32-20250707/openocd-esp32/share/openocd/scripts",
+      "IDF_DEACTIVATE_FILE_PATH": "/tmp/tmpaq5jrw8tidf_221041",
+      "IDF_MAINTAINER": "1",
+      "IDF_PATH": "/home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1",
+      "IDF_PYTHON_ENV_PATH": "/home/rafal/.espressif/python_env/idf5.5_py3.12_env",
+      "ESP_IDF_VERSION": "5.5.1",
+      "ESP_ROM_ELF_DIR": "/home/rafal/.espressif/tools/esp-rom-elfs/20241011/"
+    }
+  }
+]

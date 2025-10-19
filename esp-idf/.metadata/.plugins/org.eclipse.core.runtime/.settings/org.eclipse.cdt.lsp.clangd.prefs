@@ -1,0 +1,4 @@
+additional_options=--compile-commands-dir\=/home/rafal/dev/agh/iot/projects/HTTPClient1/build
+clangd_path=/home/rafal/.espressif/tools/esp-clang/esp-19.1.2_20250312/esp-clang/bin/clangd
+eclipse.preferences.version=1
+query_driver=/home/rafal/.espressif/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc

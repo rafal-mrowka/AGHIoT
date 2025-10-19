@@ -1,0 +1,21 @@
+                             Memory Type Usage Summary                              
+┏━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Memory Type/Section   ┃ Used [bytes] ┃ Used [%] ┃ Remain [bytes] ┃ Total [bytes] ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ Flash Code            │       499782 │          │                │               │
+│    .text              │       499782 │          │                │               │
+│ IRAM                  │        97715 │    74.55 │          33357 │        131072 │
+│    .text              │        96687 │    73.77 │                │               │
+│    .vectors           │         1028 │     0.78 │                │               │
+│ Flash Data            │        97660 │          │                │               │
+│    .rodata            │        97404 │          │                │               │
+│    .appdesc           │          256 │          │                │               │
+│ DRAM                  │        32596 │    18.04 │         148140 │        180736 │
+│    .bss               │        16488 │     9.12 │                │               │
+│    .data              │        16108 │     8.91 │                │               │
+│ RTC SLOW              │           56 │     0.68 │           8136 │          8192 │
+│    .force_slow        │           32 │     0.39 │                │               │
+│    .rtc_slow_reserved │           24 │     0.29 │                │               │
+└───────────────────────┴──────────────┴──────────┴────────────────┴───────────────┘
+/home/rafal/.espressif/python_env/idf5.5_py3.12_env/bin/python /home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/partition_table/gen_esp32part.py /home/rafal/dev/agh/iot/projects/WiFiclient/build/partition_table/partition-table.bin
+Total time taken to build the project: 1 896 ms

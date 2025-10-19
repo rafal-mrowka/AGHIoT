@@ -1,0 +1,81 @@
+#include "esp_event.h"
+#include "esp_netif.h"
+#include "lwip/ip4_addr.h"
+#include "nvs_flash.h"
+#include "esp_wifi.h"
+#include "esp_err.h"
+#include "protocol_examples_common.h";
+#include <stdio.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <sys/socket.h>  // for socket
+
+static const int  ip_protocol = 0;
+
+// connect, bind, and accept except pointers to
+// a generic socket address (protocol independent).
+// use this type for casting
+typedef struct sockaddr SA;
+const char* SERVER_IP = "192.168.1.227";
+const int SERVER_PORT = 8080;
+
+void tcp_connect(void) {
+    while(1)
+	{
+        // create an IPv4, TCP socket file descriptor
+        int sockfd = socket(AF_INET, SOCK_STREAM, ip_protocol);
+        if (sockfd < 0) {
+            printf("Unable to create socket: errno %d", errno);
+    	    return;
+        }
+
+        // set up sockaddr struct with server info
+        struct sockaddr_in address;
+        address.sin_family = AF_INET; // ipv4
+        address.sin_port = htons(SERVER_PORT); // server port, big endian
+        address.sin_addr.s_addr = ipaddr_addr(SERVER_IP); // server ip
+
+        // attempt to establish a connection with the server
+        // block until connection is established or an error occurs
+        // if successful, open the client fd for reading and writing
+        int err = connect(sockfd, (SA*)&address, sizeof(address));
+        if (err != 0) {
+	        printf("Socket unable to connect: errno %d", errno);
+    	    return;
+        }
+
+        printf("Successfully connected");
+
+        char* msg;
+        msg ="GET / HTTP/1.1\r\nHost: 192.168.1.227\r\n\r\n";
+
+        send(sockfd, msg, strlen(msg), 0);
+
+        // receive response from server
+        char buffer[1024];
+        recv(sockfd, buffer, 1024, 0);
+        ESP_LOGI(TAG, "Response was: %s\r\n", buffer);
+        vTaskDelay(pdMS_TO_TICKS(3000));
+
+        if (sockfd != -1) {
+            ESP_LOGE(TAG, "Shutting down socket and restarting...");
+            shutdown(sockfd, 0);
+            close(sockfd);
+	    }
+	}
+}
+
+
+void app_main(void)
+{
+	nvs_flash_init();
+	esp_netif_init();
+	esp_event_loop_create_default();
+	
+	example_connect();
+
+    while (true) {
+        printf("Hello from app_main!\n");
+        sleep(1);
+    }
+}

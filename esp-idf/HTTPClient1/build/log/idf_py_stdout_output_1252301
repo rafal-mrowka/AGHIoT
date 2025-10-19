@@ -1,0 +1,73 @@
+Command: ninja flash
+[1/5] cd /home/rafal/dev/agh/iot/projects/HTTPClient1/build/esp-idf/esptool_py && /home/rafal/.espressif/python_env/idf5.5_py3.12_env/bin/python /home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/rafal/dev/agh/iot/projects/HTTPClient1/build/partition_table/partition-table.bin /home/rafal/dev/agh/iot/projects/HTTPClient1/build/httpclient1.bin
+httpclient1.bin binary size 0xc03b0 bytes. Smallest app partition is 0x177000 bytes. 0xb6c50 bytes (49%) free.
+[2/5] Performing build step for 'bootloader'
+[1/1] cd /home/rafal/dev/agh/iot/projects/HTTPClient1/build/bootloader/esp-idf/esptool_py && /home/rafal/.espressif/python_env/idf5.5_py3.12_env/bin/python /home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 /home/rafal/dev/agh/iot/projects/HTTPClient1/build/bootloader/bootloader.bin
+Bootloader binary size 0x6680 bytes. 0x980 bytes (8%) free.
+[3/5] No install step for 'bootloader'
+[4/5] Completed 'bootloader'
+[4/5] cd /home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/esptool_py && /home/rafal/.espressif/tools/cmake/3.30.2/bin/cmake -D IDF_PATH=/home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1 -D "SERIAL_TOOL=/home/rafal/.espressif/python_env/idf5.5_py3.12_env/bin/python;;/home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/esptool_py/esptool/esptool.py;--chip;esp32" -D "SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args" -D WORKING_DIRECTORY=/home/rafal/dev/agh/iot/projects/HTTPClient1/build -P /home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/esptool_py/run_serial_tool.cmake
+esptool.py --chip esp32 -p /dev/ttyUSB0 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 bootloader/bootloader.bin 0x10000 httpclient1.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.10.0
+Serial port /dev/ttyUSB0
+Connecting......
+Chip is ESP32-D0WDQ6-V3 (revision v3.0)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: 78:21:84:9d:90:64
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00001000 to 0x00007fff...
+Flash will be erased from 0x00010000 to 0x000d0fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+SHA digest in image updated
+Compressed 26240 bytes to 16496...
+Writing at 0x00001000... (50 %)
+Writing at 0x000075ee... (100 %)
+Wrote 26240 bytes (16496 compressed) at 0x00001000 in 0.9 seconds (effective 235.8 kbit/s)...
+Hash of data verified.
+Compressed 787376 bytes to 495178...
+Writing at 0x00010000... (3 %)
+Writing at 0x0001c4e5... (6 %)
+Writing at 0x00024b1b... (9 %)
+Writing at 0x0002f898... (12 %)
+Writing at 0x000351f7... (16 %)
+Writing at 0x0003b143... (19 %)
+Writing at 0x00040af4... (22 %)
+Writing at 0x0004664f... (25 %)
+Writing at 0x0004c2b2... (29 %)
+Writing at 0x00051d1f... (32 %)
+Writing at 0x00057cbe... (35 %)
+Writing at 0x0005d86c... (38 %)
+Writing at 0x00063a0b... (41 %)
+Writing at 0x00068fbc... (45 %)
+Writing at 0x0006e97b... (48 %)
+Writing at 0x00074515... (51 %)
+Writing at 0x00079e17... (54 %)
+Writing at 0x0007f4bc... (58 %)
+Writing at 0x00084fb1... (61 %)
+Writing at 0x0008ad2e... (64 %)
+Writing at 0x0009059d... (67 %)
+Writing at 0x000962a8... (70 %)
+Writing at 0x0009bcb6... (74 %)
+Writing at 0x000a1653... (77 %)
+Writing at 0x000a8543... (80 %)
+Writing at 0x000b1ce7... (83 %)
+Writing at 0x000b7bfb... (87 %)
+Writing at 0x000bdbb7... (90 %)
+Writing at 0x000c3938... (93 %)
+Writing at 0x000c95c6... (96 %)
+Writing at 0x000cea5c... (100 %)
+Wrote 787376 bytes (495178 compressed) at 0x00010000 in 11.2 seconds (effective 561.4 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 105...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (105 compressed) at 0x00008000 in 0.1 seconds (effective 322.8 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...

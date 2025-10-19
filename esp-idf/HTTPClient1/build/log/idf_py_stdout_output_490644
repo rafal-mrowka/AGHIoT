@@ -1,0 +1,71 @@
+Command: ninja flash
+[1/5] cd /home/rafal/dev/agh/iot/projects/HTTPClient1/build/esp-idf/esptool_py && /home/rafal/.espressif/python_env/idf5.5_py3.12_env/bin/python /home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/rafal/dev/agh/iot/projects/HTTPClient1/build/partition_table/partition-table.bin /home/rafal/dev/agh/iot/projects/HTTPClient1/build/httpclient1.bin
+httpclient1.bin binary size 0xb7f90 bytes. Smallest app partition is 0x177000 bytes. 0xbf070 bytes (51%) free.
+[2/5] Performing build step for 'bootloader'
+[1/1] cd /home/rafal/dev/agh/iot/projects/HTTPClient1/build/bootloader/esp-idf/esptool_py && /home/rafal/.espressif/python_env/idf5.5_py3.12_env/bin/python /home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 /home/rafal/dev/agh/iot/projects/HTTPClient1/build/bootloader/bootloader.bin
+Bootloader binary size 0x6680 bytes. 0x980 bytes (8%) free.
+[3/5] No install step for 'bootloader'
+[4/5] Completed 'bootloader'
+[4/5] cd /home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/esptool_py && /home/rafal/.espressif/tools/cmake/3.30.2/bin/cmake -D IDF_PATH=/home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1 -D "SERIAL_TOOL=/home/rafal/.espressif/python_env/idf5.5_py3.12_env/bin/python;;/home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/esptool_py/esptool/esptool.py;--chip;esp32" -D "SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args" -D WORKING_DIRECTORY=/home/rafal/dev/agh/iot/projects/HTTPClient1/build -P /home/rafal/dev/agh/iot/esp-sdk/esp-idf-v5.5.1/components/esptool_py/run_serial_tool.cmake
+esptool.py --chip esp32 -p /dev/ttyUSB0 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 bootloader/bootloader.bin 0x10000 httpclient1.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.10.0
+Serial port /dev/ttyUSB0
+Connecting.....
+Chip is ESP32-D0WDQ6-V3 (revision v3.0)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: 78:21:84:9d:90:64
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00001000 to 0x00007fff...
+Flash will be erased from 0x00010000 to 0x000c7fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+SHA digest in image updated
+Compressed 26240 bytes to 16496...
+Writing at 0x00001000... (50 %)
+Writing at 0x000075ee... (100 %)
+Wrote 26240 bytes (16496 compressed) at 0x00001000 in 0.9 seconds (effective 241.2 kbit/s)...
+Hash of data verified.
+Compressed 753552 bytes to 473426...
+Writing at 0x00010000... (3 %)
+Writing at 0x0001c4b4... (6 %)
+Writing at 0x00024a51... (10 %)
+Writing at 0x0002efeb... (13 %)
+Writing at 0x0003483b... (17 %)
+Writing at 0x0003a6a8... (20 %)
+Writing at 0x0004064a... (24 %)
+Writing at 0x00046182... (27 %)
+Writing at 0x0004c37a... (31 %)
+Writing at 0x00051961... (34 %)
+Writing at 0x0005714d... (37 %)
+Writing at 0x0005cf41... (41 %)
+Writing at 0x0006279f... (44 %)
+Writing at 0x00067dc9... (48 %)
+Writing at 0x0006d887... (51 %)
+Writing at 0x000738e3... (55 %)
+Writing at 0x00079127... (58 %)
+Writing at 0x0007ede5... (62 %)
+Writing at 0x00084b0a... (65 %)
+Writing at 0x0008a417... (68 %)
+Writing at 0x0008ffc8... (72 %)
+Writing at 0x00095cf0... (75 %)
+Writing at 0x0009b5f0... (79 %)
+Writing at 0x000a27c6... (82 %)
+Writing at 0x000ab9ff... (86 %)
+Writing at 0x000b179a... (89 %)
+Writing at 0x000b7477... (93 %)
+Writing at 0x000bd5bc... (96 %)
+Writing at 0x000c2dfa... (100 %)
+Wrote 753552 bytes (473426 compressed) at 0x00010000 in 10.7 seconds (effective 561.4 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 105...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (105 compressed) at 0x00008000 in 0.1 seconds (effective 317.9 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...

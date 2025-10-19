@@ -1,0 +1,158 @@
+#include "esp_event.h"
+#include "esp_netif.h"
+#include "lwip/ip4_addr.h"
+#include "nvs_flash.h"
+#include "protocol_examples_common.h"
+#include "esp_random.h"
+#include "esp_log.h"
+
+#include <stdio.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <sys/socket.h>  // for socket
+
+//#include "esp_wifi.h"
+//#include "esp_err.h"
+
+static const char *TAG = "firstapp";
+
+static const int  ip_protocol = 0;
+
+// connect, bind, and accept except pointers to
+// a generic socket address (protocol independent).
+// use this type for casting
+typedef struct sockaddr SA;
+const char* SERVER_IP = "192.168.1.175";
+const int SERVER_PORT = 8080;
+const char *uri = "/write";
+char strftime_buf[64];
+
+int tcp_connect_sever(void) {
+
+        // create an IPv4, TCP socket file descriptor
+        int sockfd = socket(AF_INET, SOCK_STREAM, ip_protocol);
+        if (sockfd < 0) {
+            printf("Unable to create socket: errno %d\n", errno);
+    	    return -1;
+        }
+
+        // set up sockaddr struct with server info
+        struct sockaddr_in address;
+        address.sin_family = AF_INET; // ipv4
+        address.sin_port = htons(SERVER_PORT); // server port
+        address.sin_addr.s_addr = ipaddr_addr(SERVER_IP); // server ip
+
+        int err = connect(sockfd, (SA*)&address, sizeof(address));
+        if (err != 0) {
+	        printf("Socket unable to connect: errno %d\n", errno);
+    	    return -1;
+        }
+
+        printf("Successfully connected\n");
+		return sockfd;
+}
+
+void sendRequestGetResponse(int socket_file_desc) {
+	// For data to send
+	char postRequest[48];
+	char sensorData[256];
+	char sensorDataLength[20];  
+	int temp;
+	//For data to read
+	char readBuffer[1024];
+
+	// For time
+	time_t now;
+	struct tm timeinfo;
+
+	time(&now);
+	// Set timezone to CET
+	setenv("TZ", "CET-1", 1);
+	tzset();
+	
+	localtime_r(&now, &timeinfo);
+	strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+
+
+	// Prepase JSON with data
+  	temp = (int)(((double)esp_random()/4294967296.0)*10.0);
+
+	sprintf(sensorData,  "{\"time\":%s,\"temp\":%d}", strftime_buf, temp);
+	sprintf(sensorDataLength,  "%d", strlen(sensorData)); 
+	                                                                                                     
+	
+	sprintf(postRequest, "POST %s HTTP/1.1", uri);
+
+	printf(">> HTTP Request begin\n");	  
+	send(socket_file_desc, postRequest, strlen(postRequest), 0);
+	printf("%s", postRequest);
+	send(socket_file_desc, "\r\n", strlen("\r\n"), 0);
+	printf("\r\n");
+	send(socket_file_desc, "Host: ", strlen("Host: "), 0);
+	printf("Host: ");
+	send(socket_file_desc, SERVER_IP, strlen(SERVER_IP), 0);
+	printf("%s", SERVER_IP);
+	send(socket_file_desc, "\r\n", strlen("\r\n"), 0);
+	printf("\r\n");
+	send(socket_file_desc, "Content-Type: application/json\r\n", strlen("Content-Type: application/json\r\n"), 0);
+	printf("Content-Type: application/json\r\n");
+	send(socket_file_desc, "Content-Length: ", strlen("Content-Length: "), 0);
+	printf("Content-Length: ");
+	send(socket_file_desc, sensorDataLength, strlen(sensorDataLength), 0);
+	printf("%s", sensorDataLength);
+	send(socket_file_desc, "\r\n\r\n", strlen("\r\n\r\n"), 0);
+	printf("\r\n\r\n");
+	  
+	send(socket_file_desc, sensorData, strlen(sensorData), 0);
+	printf("%s", sensorData);
+	send(socket_file_desc, "\r\n", strlen("\r\n"), 0);
+	printf("\r\n");
+	         
+	printf(">> HTTP Request end\n");
+
+    // receive response from server
+    recv(socket_file_desc, readBuffer, 1024, 0);
+    printf("<< HTTP Response was:\n%s\r\n", readBuffer);
+
+    if (socket_file_desc != -1) {
+        printf("<< Socket close\n");
+    	shutdown(socket_file_desc, 0);
+        close(socket_file_desc);
+	}
+
+	return;
+}
+
+
+void app_main(void)
+{
+	nvs_flash_init();
+	esp_netif_init();
+	esp_event_loop_create_default();
+	
+	example_connect();
+
+//	ESP_ERROR_CHECK(nvs_flash_init());
+//	ESP_ERROR_CHECK(esp_netif_init());
+//	ESP_ERROR_CHECK(esp_event_loop_create_default());
+	
+//	ESP_ERROR_CHECK(example_connect());
+	
+	//sleep(20);
+
+	printf("Try to connect server\n");
+	ESP_LOGV(TAG, "Try to connect server\n");
+
+	int sockfd = -1;
+
+    while (true) {
+		sockfd = tcp_connect_sever();
+		if (sockfd>0) {
+			sendRequestGetResponse(sockfd);
+		} else {
+			printf("No TCP connection to server\n");
+		}
+
+		sleep(10);
+    }
+}
