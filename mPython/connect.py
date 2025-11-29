@@ -16,7 +16,7 @@ def wifi_connect(ssid, password):
 
 def start_apn():
     ap = network.WLAN(network.AP_IF)
-    ap.config(essid='ESP32-APN')
+    ap.config(essid='AGHIoTLecture')
     ap.config(max_clients=10)
     ap.active(True)
 
